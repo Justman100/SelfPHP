@@ -1,0 +1,67 @@
+#!/bin/bash
+
+read -p "Mode: " mode
+read -p "PHP version: " version
+
+case $mode in
+    apt)
+        [[ -z $version ]] && version=8.4
+
+        apt install php$version-{amqp,apcu,ast,bcmath,bz2,calendar,cgi,cli,common,ctype,curl,dba,dev,dom,ds,enchant,excimer,exif,ffi,fileinfo,fpm,ftp,gd,gearman,gettext,gmp,gnupg,http,iconv,igbinary,intl,interbase,intl,ldap,mailparse,maxminddb,mbstring,mcrypt,memcache,memcached,mongodb,msgpack,mysql,mysqli,mysqlnd,oauth,opcache,pcov,pdo,pdo-dblib,pdo-firebird,pdo-mysql,pdo-pgsql,pdo-sqlite,pgsql,phar,phpdbg,posix,ps,pspell,raphf,readline,redis,rrd,shmop,simplexml,smbclient,snmp,soap,sockets,sqlite3,ssh2,stomp,sybase,sysvmsg,sysvsem,sysvshm,tidy,tokenizer,uopz,uploadprogress,uuid,xdebug,xml,xmlreader,xmlrpc,xmlwriter,xsl,yaml,zip,zmq,zstd}
+    ;;
+
+    manual)
+        [[ -z $(which cru) ]] || [[ -z $(which msd) ]] && bash <(curl -s https://scripts.justman10000.de/assets/scripts/scripts.sh)
+
+        scriptPath=$(pwd)
+
+        [[ -n $version ]] && version=PHP-$version
+        [[ -z $version ]] && version=master
+
+        ! [[ -d /usr/local/php ]] && mkdir /usr/local/php
+        cd /usr/local/php
+        
+        git init
+        git remote add origin https://github.com/php/php-src.git
+        git pull origin $version
+
+        bash $scriptPath/scripts/gen-rep
+        bash $scriptPath/scripts/build
+
+        make install
+
+        mv /usr/local/bin/php* /usr/bin
+        mv /usr/local/sbin/php* /usr/sbin
+
+        mkdir /etc/php-fpm.d
+
+        cp /usr/local/php/sapi/fpm/php-fpm.conf /etc/php-fpm.conf
+        cp /usr/local/php/sapi/fpm/php-fpm.service /etc/systemd/system/php-fpm.service
+        cp /usr/local/php/sapi/fpm/www.conf /etc/php-fpm.d/www.conf
+        cp /usr/local/php/php.ini-production /etc/php.ini
+
+        sed -i 's/\/usr\/local//g' /etc/systemd/system/php-fpm.service
+
+        sed -i 's/user = nobody/user = php/g' /etc/php-fpm.d/www.conf
+        sed -i 's/group = nobody/group = php/g' /etc/php-fpm.d/www.conf
+
+        sed -i 's/include=NONE\/etc\/php-fpm.d\/\*\.conf/include=\/etc\/php-fpm.d\/\*\.conf/g' /etc/php-fpm.conf
+        sed -i 's/;error_log = log\/php-fpm.log/error_log = \/var\/log\/php-fpm.log/g' /etc/php-fpm.conf
+
+        mkdir /run/php
+
+        version=$(php -vs | grep -ioP '\d\.\d\.\d' | sed 's|\.[0-9]$||g' | head -n 1)
+
+        sed -i "s|\;pid = run/php\-fpm\.pid|pid = /run/php/php$version\-fpm\.pid|g" /etc/php-fpm.conf
+        sed -i "s|listen = 127.0.0.1\:9000|listen = /run/php/php$version\-fpm\.sock|g" /etc/php-fpm.d/www.conf
+
+        bash $scriptPath/externals/main
+
+        for ext in $(ls $(php-config --extension-dir)); do
+            sed -i "s|;extension=$(echo $ext | sed 's|.so||g')|extension=$(echo $ext | sed 's|.so||g')|g" /etc/php.ini
+        done
+        
+        cru php
+        msd -r php-fpm
+    ;;
+esac

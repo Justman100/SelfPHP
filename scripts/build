@@ -1,0 +1,15 @@
+. php_extension_analysis*.txt
+
+for ext in ${EXTENSIONS_WITH_ENABLE[@]}; do
+    OPTIONS+=" --enable-$ext=shared"
+done
+
+for ext in ${EXTENSIONS_WITH_WITH[@]}; do
+    OPTIONS+=" --with-$ext=shared"
+done
+
+OPTIONS+=" --with-pdo-mysql=/usr/local/mariadb"
+OPTIONS+=" --enable-pdo"
+OPTIONS+=" --enable-mysqlnd"
+
+bash configure ${OPTIONS[@]} --with-config-file-path=/etc --enable-fpm

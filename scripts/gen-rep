@@ -1,0 +1,152 @@
+#!/bin/bash
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+print_colored() {
+    local color=$1
+    local message=$2
+    echo -e "${color}${message}${NC}"
+}
+
+if [[ ! -f "./configure" ]]; then
+    print_colored $RED "Error: configure script not found!"
+    print_colored $YELLOW "Please run this script in the PHP source code directory."
+    exit 1
+fi
+
+HELP_OUTPUT=$(mktemp)
+EXT_DIR_LIST=$(mktemp)
+RESULTS_FILE=$(mktemp)
+
+cleanup() {
+    rm -f "$HELP_OUTPUT" "$EXT_DIR_LIST" "$RESULTS_FILE"
+}
+trap cleanup EXIT
+
+print_colored $BLUE "🔍 Analyzing PHP Configure options..."
+
+if [[ -d "./ext" ]]; then
+    find ./ext -maxdepth 1 -type d -name "*" -exec basename {} \; | grep -v "^ext$" | sort > "$EXT_DIR_LIST"
+else
+    print_colored $RED "Error: ext directory not found!"
+    exit 1
+fi
+
+./configure --help > "$HELP_OUTPUT" 2>&1
+
+print_colored $BLUE "📊 Creating analysis report..."
+
+cat > "$RESULTS_FILE" << 'EOF'
+
+EXTENSIONS_WITH_WITH=()
+EXTENSIONS_WITH_ENABLE=()
+EXTENSIONS_NOT_CONFIGURABLE=()
+CONFIGURE_OPTIONS=()
+
+EOF
+
+declare -a with_extensions=()
+declare -a enable_extensions=()
+declare -a not_configurable=()
+
+while IFS= read -r ext_name; do
+    # Search for --with-$ext_name
+    with_match=$(grep -E "^\s*--with-${ext_name}(\[|=|\s)" "$HELP_OUTPUT" || true)
+    
+    # Search for --enable-$ext_name
+    enable_match=$(grep -E "^\s*--enable-${ext_name}(\[|=|\s)" "$HELP_OUTPUT" || true)
+    
+    if [[ -n "$with_match" ]]; then
+        with_extensions+=("$ext_name")
+        # Extract the description
+        description=$(echo "$with_match" | sed 's/^[[:space:]]*--with-[^[:space:]]*//' | sed 's/^[[:space:]]*//')
+        echo "CONFIGURE_OPTIONS+=(\"--with-${ext_name}\")" >> "$RESULTS_FILE"
+        printf "%-20s %s %s\n" "$ext_name" "--with-${ext_name}" "$description"
+    elif [[ -n "$enable_match" ]]; then
+        enable_extensions+=("$ext_name")
+        # Extract the description
+        description=$(echo "$enable_match" | sed 's/^[[:space:]]*--enable-[^[:space:]]*//' | sed 's/^[[:space:]]*//')
+        echo "CONFIGURE_OPTIONS+=(\"--enable-${ext_name}\")" >> "$RESULTS_FILE"
+        printf "%-20s %s %s\n" "$ext_name" "--enable-${ext_name}" "$description"
+    else
+        not_configurable+=("$ext_name")
+    fi
+done < "$EXT_DIR_LIST"
+
+echo "" >> "$RESULTS_FILE"
+echo "# Extensions with --with option:" >> "$RESULTS_FILE"
+for ext in "${with_extensions[@]}"; do
+    [[ $ext = *snmp* ]] && continue
+    [[ $ext = *readline* ]] && ext=libedit
+    echo "EXTENSIONS_WITH_WITH+=(\"$ext\")" >> "$RESULTS_FILE"
+done
+
+echo "" >> "$RESULTS_FILE"
+echo "# Extensions with --enable option:" >> "$RESULTS_FILE"
+for ext in "${enable_extensions[@]}"; do
+    echo "EXTENSIONS_WITH_ENABLE+=(\"$ext\")" >> "$RESULTS_FILE"
+done
+
+echo "" >> "$RESULTS_FILE"
+echo "# Extensions without configure option:" >> "$RESULTS_FILE"
+for ext in "${not_configurable[@]}"; do
+    echo "EXTENSIONS_NOT_CONFIGURABLE+=(\"$ext\")" >> "$RESULTS_FILE"
+done
+
+print_colored $GREEN "\n📈 Summary:"
+print_colored $YELLOW "Extensions with --with:    ${#with_extensions[@]}"
+print_colored $YELLOW "Extensions with --enable:  ${#enable_extensions[@]}"
+print_colored $YELLOW "Not configurable:          ${#not_configurable[@]}"
+
+print_colored $GREEN "\n🟢 Extensions with --with option:"
+printf "%-20s %-25s %s\n" "Extension" "Configure Option" "Description"
+print_colored $BLUE "$(printf '%.0s-' {1..80})"
+
+for ext in "${with_extensions[@]}"; do
+    with_match=$(grep -E "^\s*--with-${ext}(\[|=|\s)" "$HELP_OUTPUT")
+    description=$(echo "$with_match" | sed 's/^[[:space:]]*--with-[^[:space:]]*//' | sed 's/^[[:space:]]*//')
+    printf "%-20s %-25s %s\n" "$ext" "--with-${ext}" "$description"
+done
+
+print_colored $GREEN "\n🔵 Extensions with --enable option:"
+printf "%-20s %-25s %s\n" "Extension" "Configure Option" "Description"
+print_colored $BLUE "$(printf '%.0s-' {1..80})"
+
+for ext in "${enable_extensions[@]}"; do
+    enable_match=$(grep -E "^\s*--enable-${ext}(\[|=|\s)" "$HELP_OUTPUT")
+    description=$(echo "$enable_match" | sed 's/^[[:space:]]*--enable-[^[:space:]]*//' | sed 's/^[[:space:]]*//')
+    printf "%-20s %-25s %s\n" "$ext" "--enable-${ext}" "$description"
+done
+
+if [[ ${#not_configurable[@]} -gt 0 ]]; then
+    print_colored $RED "\n🔴 Extensions without configure option:"
+    for ext in "${not_configurable[@]}"; do
+        printf "%-20s %s\n" "$ext" "(not configurable or already enabled by default)"
+    done
+fi
+
+print_colored $BLUE "\n🚀 Generating sample configure command..."
+
+SAMPLE_CONFIGURE="./configure"
+for ext in "${with_extensions[@]:0:5}"; do  # Only the first 5 as example
+    SAMPLE_CONFIGURE+=" --with-${ext}"
+done
+for ext in "${enable_extensions[@]:0:5}"; do  # Only the first 5 as example
+    SAMPLE_CONFIGURE+=" --enable-${ext}"
+done
+
+print_colored $GREEN "\n💡 Sample configure command (first 5 of each category):"
+echo "$SAMPLE_CONFIGURE"
+
+REPORT_FILE="php_extension_analysis_$(date +%Y%m%d_%H%M%S).txt"
+cp "$RESULTS_FILE" "$REPORT_FILE"
+
+print_colored $GREEN "\n💾 Full report saved as: $REPORT_FILE"
+print_colored $YELLOW "You can use the arrays from this file in other scripts:"
+print_colored $BLUE "source $REPORT_FILE"

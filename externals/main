@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for external in $(ls *); do
+    [[ $external == "main" ]] && continue
+    bash $external
+done

@@ -1,0 +1,14 @@
+#/bin/bash
+
+mkdir /home/phpredis
+cd /home/phpredis
+
+git init
+git pull https://github.com/phpredis/phpredis.git
+
+phpize
+
+bash configure
+make install
+
+rm -r /home/phpredis

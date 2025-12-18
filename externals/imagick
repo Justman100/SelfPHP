@@ -1,0 +1,12 @@
+mkdir /home/imagick
+cd /home/imagick
+
+git init
+git pull https://github.com/Imagick/imagick
+
+phpize
+
+bash configure
+make install
+
+rm -r /home/imagick
