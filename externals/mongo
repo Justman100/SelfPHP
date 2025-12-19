@@ -1,0 +1,21 @@
+#!/bin/bash
+
+mkdir /home/mongo
+cd /home/mongo
+
+git init
+git pull https://github.com/mongodb/mongo-php-driver
+
+phpize
+
+git submodule init
+git submodule update
+
+rm -r /home/mongo/src/libmongoc /home/mongo/src/libmongocrypt
+
+cmake -S src/libmongoc
+
+bash configure --enable-mongodb
+make install
+
+rm -r /home/mongo
