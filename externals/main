@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for external in $(ls *); do
-    [[ $external == "main" ]] && continue
+for external in $(ls $scriptPath/externals/*); do
+    [[ $external == *main* ]] && continue
     bash $external
 done
