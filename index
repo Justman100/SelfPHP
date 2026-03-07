@@ -25,6 +25,8 @@ case $mode in
         git remote add origin https://github.com/php/php-src.git
         git pull origin $version
 
+        bash buildconf
+
         bash $scriptPath/scripts/gen-rep
         bash $scriptPath/scripts/build
 
