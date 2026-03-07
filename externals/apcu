@@ -1,0 +1,14 @@
+#!/bin/bash
+
+mkdir /home/apcu
+cd /home/apcu
+
+git init
+git pull https://github.com/krakjoe/apcu.git
+
+phpize
+
+bash configure
+make install
+
+rm -r /home/apcu
