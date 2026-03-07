@@ -50,7 +50,7 @@ case $mode in
         sed -i 's/include=NONE\/etc\/php-fpm.d\/\*\.conf/include=\/etc\/php-fpm.d\/\*\.conf/g' /etc/php-fpm.conf
         sed -i 's/;error_log = log\/php-fpm.log/error_log = \/var\/log\/php-fpm.log/g' /etc/php-fpm.conf
 
-        mkdir /run/php
+        [[ -d /run/php ]] && rm -r /run/php && mkdir /run/php
 
         version=$(php -vs | grep -ioP '\d\.\d\.\d' | sed 's|\.[0-9]$||g' | head -n 1)
 
