@@ -31,9 +31,9 @@ case $mode in
         bash $scriptPath/scripts/build
 
         make install
-
-        mv /usr/local/bin/php* /usr/bin
-        mv /usr/local/sbin/php* /usr/sbin
+        
+        mv /usr/local/bin/* /usr/bin
+        mv /usr/local/sbin/* /usr/sbin
 
         mkdir /etc/php-fpm.d
 
