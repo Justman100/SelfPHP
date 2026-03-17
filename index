@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mode=manual
+
 read -p "Mode: " mode
 read -p "PHP version: " version
 
