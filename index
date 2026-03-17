@@ -80,7 +80,7 @@ EOF
             sed -i "s|;extension=$(echo $ext | sed 's|.so||g')|extension=$(echo $ext | sed 's|.so||g')|g" /etc/php.ini
         done
         
-        cru php
+        [[ -z $(cat /etc/passwd | grep php) ]] && cru php
         msd -r php-fpm
     ;;
 esac
