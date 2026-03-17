@@ -33,9 +33,11 @@ EOF
         ! [[ -d /usr/local/php ]] && mkdir /usr/local/php
         cd /usr/local/php
         
-        git init
-        git remote add origin https://github.com/php/php-src.git
-        git pull origin $version
+        if ! [[ -d /usr/local/php ]]; then
+            git init
+            git remote add origin https://github.com/php/php-src.git
+            git pull origin $version
+        fi
 
         bash buildconf
 
