@@ -51,7 +51,7 @@ EOF
         mv /usr/local/bin/* /usr/bin
         mv /usr/local/sbin/* /usr/sbin
 
-        mkdir /etc/php-fpm.d
+        ! [[ -d /etc/php-fpm.d ]] && mkdir /etc/php-fpm.d
 
         cp /usr/local/php/sapi/fpm/php-fpm.conf /etc/php-fpm.conf
         cp /usr/local/php/sapi/fpm/php-fpm.service /etc/systemd/system/php-fpm.service
