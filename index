@@ -13,7 +13,13 @@ case $mode in
     manual)
         [[ -z $(which cru) ]] || [[ -z $(which msd) ]] && bash <(curl -s https://scripts.justman10000.de/assets/scripts/scripts.sh)
 
-        scriptPath=$(pwd)
+        cat << EOF > /root/.bashrc
+
+# SelfPHP
+export scriptPath=$(cat pwd)
+EOF
+
+        . /root/.bashrc
 
         [[ -n $version ]] && version=PHP-$version
         [[ -z $version ]] && version=master

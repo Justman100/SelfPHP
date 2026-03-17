@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /root/.bashrc
+
 for external in $(ls $scriptPath/externals/*); do
     [[ $external == *main* ]] && continue
     bash $external
