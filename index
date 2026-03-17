@@ -41,8 +41,10 @@ EOF
 
         ! [[ -f configure ]] && bash buildconf
 
-        bash $scriptPath/scripts/gen-rep
-        bash $scriptPath/scripts/build
+        if ! [[ -f Makefile ]]; then
+            bash $scriptPath/scripts/gen-rep
+            bash $scriptPath/scripts/build
+        fi
 
         make install
         
