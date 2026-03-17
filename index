@@ -39,7 +39,7 @@ EOF
             git pull origin $version
         fi
 
-        bash buildconf
+        ! [[ -f configure ]] && bash buildconf
 
         bash $scriptPath/scripts/gen-rep
         bash $scriptPath/scripts/build
