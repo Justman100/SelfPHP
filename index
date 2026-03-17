@@ -2,8 +2,11 @@
 
 mode=manual
 
-read -p "Mode: " mode
-read -p "PHP version: " version
+if ! [[ -f version ]]; then
+    read -p "Mode: " mode
+    read -p "PHP version: " version
+    echo $version | tee version
+fi
 
 case $mode in
     apt)
@@ -24,6 +27,7 @@ EOF
         . /root/.bashrc
 
         [[ -n $version ]] && version=PHP-$version
+        [[ -f version ]] && version=PHP-$(cat version)
         [[ -z $version ]] && version=master
 
         ! [[ -d /usr/local/php ]] && mkdir /usr/local/php
