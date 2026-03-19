@@ -33,9 +33,12 @@ EOF
         [[ -f version ]] && version=PHP-$(cat version)
         [[ -z $version ]] && version=master
 
-        ! [[ -d /usr/local/php ]] && mkdir /usr/local/php
-        cd /usr/local/php
-        
+        if [[ -d /usr/local/php ]]; then
+            echo "Existing PHP Installation detected! Do you want reinstall? [y/N]"
+            read reinstall
+
+            [[ $reinstall == "y" ]] && rm -r /usr/local/php
+        fi
         if ! [[ -d /usr/local/php ]]; then
             git init
             git remote add origin https://github.com/php/php-src.git
