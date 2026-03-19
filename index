@@ -43,6 +43,9 @@ EOF
         [[ -d /usr/local/php ]] && cd /usr/local/php
 
         if ! [[ -d /usr/local/php ]]; then
+            mkdir /usr/local/php
+            cd /usr/local/php
+
             git init
             git remote add origin https://github.com/php/php-src.git
             git pull origin $version
