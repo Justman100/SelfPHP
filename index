@@ -21,7 +21,7 @@ case $mode in
         cat << EOF > /root/.bashrc
 
 # SelfPHP
-export scriptPath=$(cat pwd)
+export scriptPath=$(pwd)
 EOF
 
         . /root/.bashrc
