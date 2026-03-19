@@ -30,7 +30,6 @@ EOF
             exit
         fi
 
-        [[ -n $version ]] && version=PHP-$version
         [[ -f version ]] && version=PHP-$(cat version)
         [[ -z $version ]] && version=master
 
