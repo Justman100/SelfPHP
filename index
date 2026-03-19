@@ -39,6 +39,9 @@ EOF
 
             [[ $reinstall == "y" ]] && rm -r /usr/local/php
         fi
+
+        [[ -d /usr/local/php ]] && cd /usr/local/php
+
         if ! [[ -d /usr/local/php ]]; then
             git init
             git remote add origin https://github.com/php/php-src.git
