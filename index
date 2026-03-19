@@ -18,13 +18,17 @@ case $mode in
     manual)
         [[ -z $(which cru) ]] || [[ -z $(which msd) ]] && bash <(curl -s https://scripts.justman10000.de/assets/scripts/scripts.sh)
 
-        cat << EOF > /root/.bashrc
+        if [[ -z $scriptPath ]]; then
+            cat << EOF >> /root/.bashrc
+
 
 # SelfPHP
 export scriptPath=$(pwd)
 EOF
 
-        . /root/.bashrc
+            echo "Working dir set! Please restart the terminal!"
+            exit
+        fi
 
         [[ -n $version ]] && version=PHP-$version
         [[ -f version ]] && version=PHP-$(cat version)
