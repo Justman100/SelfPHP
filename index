@@ -71,6 +71,7 @@ EOF
         cp /usr/local/php/php.ini-production /etc/php.ini
 
         sed -i 's/\/usr\/local//g' /etc/systemd/system/php-fpm.service
+        sed -i 's/PIDFile=\/var/PIDFile=/g' /etc/systemd/system/php-fpm.service
 
         sed -i 's/user = nobody/user = php/g' /etc/php-fpm.d/www.conf
         sed -i 's/group = nobody/group = php/g' /etc/php-fpm.d/www.conf
