@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[[ -n $(ls /usr/local/php/*txt) ]] && rm *txt
+
 set -euo pipefail
 
 RED='\033[0;31m'
