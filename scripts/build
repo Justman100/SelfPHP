@@ -10,7 +10,7 @@ for ext in ${EXTENSIONS_WITH_WITH[@]}; do
     OPTIONS+=" --with-$ext=shared"
 done
 
-OPTIONS+=" --with-pdo-mysql=/usr/local/mariadb"
+OPTIONS+=" --with-pdo-mysql=/usr/local/mysql"
 OPTIONS+=" --enable-pdo"
 OPTIONS+=" --enable-mysqlnd"
 
