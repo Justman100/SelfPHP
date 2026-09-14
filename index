@@ -63,6 +63,8 @@ EOF
             bash $scriptPath/scripts/build
         fi
 
+        ! [[ -f Makefile ]] && echo Configuring failed! Abort...! && exit 1
+
         make install
         
         mv /usr/local/bin/* /usr/bin
