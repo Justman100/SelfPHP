@@ -101,6 +101,6 @@ EOF
         done
         
         [[ -z $(cat /etc/passwd | grep php) ]] && cru php
-        msd -r php-fpm
+        msd -r -n php-fpm
     ;;
 esac
