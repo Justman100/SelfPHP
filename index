@@ -100,6 +100,12 @@ EOF
             sed -i "s|;extension=$(echo $ext | sed 's|.so||g')|extension=$(echo $ext | sed 's|.so||g')|g" /etc/php.ini
         done
 
+        echo "Now, copy this to /etc/php.ini into their extension section (replace all already declared/activated extensions with it)"
+        for ext in $(ls $(php-config --extension-dir)); do
+            echo extension=$ext
+        done
+        read -p "Press any key if you're done to continue..."
+
         [[ -z $(cat /etc/passwd | grep php) ]] && cru php
         msd -r -n php-fpm
     ;;
