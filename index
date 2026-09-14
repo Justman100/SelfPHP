@@ -6,7 +6,6 @@ if ! [[ -f version ]]; then
     read -p "Mode: " mode
     read -p "PHP version: " version
 
-    echo master | tee version
     [[ -n $version ]] && [[ $version != "master" ]] && echo $version | tee version
 fi
 
@@ -31,9 +30,9 @@ EOF
             echo "Working dir set! Please restart the terminal!"
             exit
         fi
-
+        
+        version=master
         [[ -f version ]] && version=PHP-$(cat version)
-        [[ -z $version ]] && version=master
 
         if [[ -d /usr/local/php ]]; then
             echo "Existing PHP Installation detected! Do you want reinstall? [y/N]"
