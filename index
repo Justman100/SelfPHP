@@ -5,7 +5,9 @@ mode=manual
 if ! [[ -f version ]]; then
     read -p "Mode: " mode
     read -p "PHP version: " version
-    echo $version | tee version
+
+    echo master | tee version
+    [[ -n $version ]] && [[ $version != "master" ]] && echo $version | tee version
 fi
 
 case $mode in
