@@ -53,7 +53,10 @@ EOF
             git pull origin $version
         fi
 
-        ! [[ -f configure ]] && bash buildconf
+        if ! [[ -f configure ]]; then
+            ! [[ -f buildconf ]] && echo Neither configure nor buildconf found! Abort...! && exit 1
+            bash buildconf
+        fi
 
         if ! [[ -f Makefile ]]; then
             bash $scriptPath/scripts/gen-rep
