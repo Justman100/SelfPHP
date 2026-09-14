@@ -49,7 +49,7 @@ EOF
 
             git init
             git remote add origin https://github.com/php/php-src.git
-            git pull origin $version
+            git pull origin $version --depth 1
         fi
 
         if ! [[ -f configure ]]; then
