@@ -106,6 +106,8 @@ EOF
         read -p "Press any key if you're done to continue..."
 
         [[ -z $(cat /etc/passwd | grep php) ]] && cru php
+
+        systemctl daemon-reload
         msd -r -n php-fpm
     ;;
 esac
